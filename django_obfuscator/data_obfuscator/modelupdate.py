@@ -72,29 +72,35 @@ def process_field(model_rec, field_action):
 
 
 def process_model(model_obj, fields_collection):
+    totalprocessed = 0
     processed = 0
     for anobj in model_obj.objects.all():
         transaction.set_autocommit(False)
-        if (processed == 0) | (processed % 1000):
+        if (processed == 0) | ((processed % 1000)!=0):
             record_success = True
             for field_action in fields_collection:
                 record_success &= process_field(anobj, field_action)
             if record_success:
                 anobj.save()
                 processed += 1
+            else:
+                logger.error("Processing record failed")
         else:
+            totalprocessed += processed
+            processed = 0
             logger.info(
                 u"Batch Commit : processed {0} records for {1}".format(
-                    processed,
+                    totalprocessed,
                     model_obj))
             transaction.commit()
             transaction.set_autocommit(True)
     # to catch the stragglers
+    totalprocessed += processed
     transaction.commit()
     transaction.set_autocommit(True)
     logger.info(
         u"FINAL Commit: processed {0} records for {1}".format(
-            processed,
+            totalprocessed,
             model_obj))
 
 
