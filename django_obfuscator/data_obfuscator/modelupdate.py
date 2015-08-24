@@ -49,23 +49,23 @@ def process_field(model_rec, field_action):
                 return False
             else:
                 field_data = metafield.deconstruct()
+                # field_data is of the format (field name, django class, [],
+                # { k,v of field kwargs }
                 if field_data[1] == u"django.db.models.CharField":
                     if 'max_length' in field_data[3]:
-                        setattr(
-                            model_rec,
+                        updatevalue = process_field_action(
                             field_action[1],
-                            process_field_action(
-                                field_action[1],
-                                field_data[3]['max_length']))
+                            field_data[3]['max_length'])
+                        setattr(model_rec, field_action[0], updatevalue)
                         return True
                     else:
                         logger.error(
-                            "This field {0} has no length attribute".format(
+                            "Text field {0} has no length attribute".format(
                                 field_action[0]))
                         return False
                 else:  # This is not a character field
                     setattr(model_rec,
-                            field_action[1],
+                            field_action[0],
                             process_field_action(
                                 field_action[1], 0))
                     return True
@@ -74,24 +74,23 @@ def process_field(model_rec, field_action):
 def process_model(model_obj, fields_collection):
     processed = 0
     for anobj in model_obj.objects.all():
-        logger.info(u"processing  record {0}".format(anobj.id))
         transaction.set_autocommit(False)
-        while (processed == 0) | (processed % 1000):
+        if (processed == 0) | (processed % 1000):
             record_success = True
-            logging.debug(
-                u"Have to process fields : {0}".format(fields_collection))
             for field_action in fields_collection:
-                logging.debug(u"Processing field {0}".format(field_action))
                 record_success &= process_field(anobj, field_action)
             if record_success:
                 anobj.save()
                 processed += 1
-        logger.info(
-            u"Batch Commit : processed {0} records for {1}".format(
-                processed,
-                model_obj))
-        transaction.set_autocommit(True)
+        else:
+            logger.info(
+                u"Batch Commit : processed {0} records for {1}".format(
+                    processed,
+                    model_obj))
+            transaction.commit()
+            transaction.set_autocommit(True)
     # to catch the stragglers
+    transaction.commit()
     transaction.set_autocommit(True)
     logger.info(
         u"FINAL Commit: processed {0} records for {1}".format(
