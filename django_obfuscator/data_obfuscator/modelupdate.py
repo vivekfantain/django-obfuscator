@@ -24,6 +24,9 @@ from django.db import transaction
 from . import discover
 
 
+logger = logging.getLogger("data_obfuscator")
+
+
 def process_field_action(action, length):
     if action == "name":
         return "vivek"
@@ -42,54 +45,63 @@ def process_field(model_rec, field_action):
     if field_action:
         metafield = getattr(model_rec, "_meta").get_field(field_action[0])
         if metafield:
-            if metafield.auto_created | metafield.hidden | metafield.is_relation:
+            if metafield.auto_created:
                 return False
             else:
                 field_data = metafield.deconstruct()
-                logging.debug(
-                    u"metadata for field {0} is {1}".format(
-                        field_action[0],
-                        field_data))
-                if 'max_length' in field_data:
-                    setattr(
-                        model_rec,
-                        field_action[1],
-                        process_field_action(
+                if field_data[1] == u"django.db.models.CharField":
+                    if 'max_length' in field_data[3]:
+                        setattr(
+                            model_rec,
                             field_action[1],
-                            field_data['max_length']))
+                            process_field_action(
+                                field_action[1],
+                                field_data[3]['max_length']))
+                        return True
+                    else:
+                        logger.error(
+                            "This field {0} has no length attribute".format(
+                                field_action[0]))
+                        return False
+                else:  # This is not a character field
+                    setattr(model_rec,
+                            field_action[1],
+                            process_field_action(
+                                field_action[1], 0))
                     return True
-                else:
-                    logging.error(
-                        "This field {0} has no length attribute".format(
-                            field_action[0]))
 
 
 def process_model(model_obj, fields_collection):
     processed = 0
     for anobj in model_obj.objects.all():
+        logger.info(u"processing  record {0}".format(anobj.id))
         transaction.set_autocommit(False)
-        while processed % 1000:
+        while (processed == 0) | (processed % 1000):
             record_success = True
+            logging.debug(
+                u"Have to process fields : {0}".format(fields_collection))
             for field_action in fields_collection:
+                logging.debug(u"Processing field {0}".format(field_action))
                 record_success &= process_field(anobj, field_action)
             if record_success:
                 anobj.save()
                 processed += 1
-        logging.info(
-            u"processed {0} records for {1}".format(
+        logger.info(
+            u"Batch Commit : processed {0} records for {1}".format(
                 processed,
                 model_obj))
         transaction.set_autocommit(True)
     # to catch the stragglers
     transaction.set_autocommit(True)
-    logging.info(
-        u"processed {0} records for {1}".format(
+    logger.info(
+        u"FINAL Commit: processed {0} records for {1}".format(
             processed,
             model_obj))
 
 
 def process_file(filedata):
     for modelinfo, fieldinfo in filedata.iteritems():
+        logger.info(u"Processing model :{0}".format(modelinfo))
         model = discover.get_model(modelinfo[0], modelinfo[1])
         if model:
             process_model(model, fieldinfo)
