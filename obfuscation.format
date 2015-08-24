@@ -1,0 +1,11 @@
+The file format is essentially  a CSV file that has the following fields
+
+<App label>, <model Name>, <field_name>, <Obfuscation Type>
+
+The first three fields are fairly obvious.  The obfuscation types supported are
+
+name         :
+zero         :
+none         :
+randomstring :
+randomnumber : 

@@ -1,14 +1,4 @@
-# django-obfuscator
-A project for obfuscating data in Django models. 
-
-Unfortunately for developers, issues can be best debugged with production data.
-Production data cannot be freely shared for any reasonably complex production
-application.  Thus the concept of data obfuscation before sharing.  This app
-attempts to obfuscate production data based on a set of inputs provided about
-the various data models.  The app supports a set of obfuscations that are
-elaborated further in *obfuscation.format* file.  
- 
-
+"""
 Copyright  2015, Fantain Sports Private Limited
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,4 +12,5 @@ Copyright  2015, Fantain Sports Private Limited
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+"""
 
