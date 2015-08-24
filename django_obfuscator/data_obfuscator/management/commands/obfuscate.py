@@ -10,16 +10,12 @@ class Command(BaseCommand):
         parser.add_argument('csv_name', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        if options.get('csv_name'):
-            csv_name = options['csv_name'][0]
+        csv_name = options['csv_name'][0]
 
-            if os.path.exists(csv_name):
-                self.read_csv(csv_name)
-            else:
-                raise CommandError("CSV file not found.")
-
+        if os.path.exists(csv_name):
+            self.read_csv(csv_name)
         else:
-            self.stdout.write("no csv found")
+            raise CommandError("CSV file not found.")
 
     @staticmethod
     def get_csv_record(csv_name):
@@ -41,12 +37,13 @@ class Command(BaseCommand):
                 try:
                     key, value = csv_rec.next()
                     if key in model_data:
-                        model_data[key].append(value)
+                        if value not in model_data[key]:
+                            model_data[key].append(value)
                     else:
                         model_data[key] = [value]
 
                 except StopIteration:
                     break
-            print model_data
+
         except IOError:
             self.stdout.write("Couldn't read CSV File.")
