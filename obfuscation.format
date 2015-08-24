@@ -1,0 +1,11 @@
+The file format is essentially  a CSV file that has the following fields
+
+<App label>, <model Name>, <field_name>, <Obfuscation Type>
+
+The first three fields are fairly obvious.  The obfuscation types supported are
+
+name         : Tells the obfuscator that this is a name field.  Obfuscator will use a random name from its internal name database to populate this field.  Typically use this for first_name and last_name fields
+zero         : Tells the obfuscator to fill with zeros
+none         : Tells the obfuscator to set the field to None
+randomstring : Tells the obfuscator to put a random string in the field
+randomnumber :  Tells the obfuscator to put a random number in the field
