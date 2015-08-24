@@ -1,23 +1,31 @@
 from os import path
 from csv import DictReader
+from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
     help = "Obfuscate the model data's"
-
-    def add_arguments(self, parser):
-        parser.add_argument('csv_name', nargs='+', type=str)
+    option_list = BaseCommand.option_list + (
+        make_option('--csv',
+                    action='store',
+                    dest='csv_name',
+                    default=None,
+                    help='Input csv file for processing.'),
+    )
 
     def handle(self, *args, **options):
-        csv_name = options['csv_name'][0]
+        if options['csv_name']:
+            csv_name = options['csv_name']
 
-        if path.exists(csv_name):
-            app_model_data = self.read_csv(csv_name)
-            self.process_csv_data(app_model_data)
+            if path.exists(csv_name):
+                app_model_data = self.read_csv(csv_name)
+                self.process_csv_data(app_model_data)
+            else:
+                raise CommandError("CSV file not found.")
         else:
-            raise CommandError("CSV file not found.")
+            raise CommandError("Please enter CSV name with the command.")
 
     def read_csv(self, csv_name):
         try:
@@ -53,5 +61,3 @@ class Command(BaseCommand):
 
     def process_csv_data(self, app_model_data):
         pass
-
-
