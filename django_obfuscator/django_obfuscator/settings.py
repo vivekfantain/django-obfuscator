@@ -53,6 +53,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'data_obfuscator',
+    'testobfuscator',
 )
 
 MIDDLEWARE_CLASSES = (

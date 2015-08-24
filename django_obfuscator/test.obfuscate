@@ -1,0 +1,4 @@
+app_name,model_name,field_name,operation
+testobfuscator,MyModel,aname,name
+testobfuscator,MyModel,anint,zero 
+testobfuscator,MyModel,astring,randomstring

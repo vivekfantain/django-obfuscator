@@ -2,7 +2,7 @@ from os import path
 from csv import DictReader
 
 from django.core.management.base import BaseCommand, CommandError
-
+from data_obfuscator.modelupdate import process_file
 
 class Command(BaseCommand):
     help = "Obfuscate the model data's"
@@ -11,6 +11,7 @@ class Command(BaseCommand):
         parser.add_argument('csv_name', nargs='+', type=str)
 
     def handle(self, *args, **options):
+        print options
         csv_name = options['csv_name'][0]
 
         if path.exists(csv_name):
@@ -52,6 +53,4 @@ class Command(BaseCommand):
                 yield key, value
 
     def process_csv_data(self, app_model_data):
-        pass
-
-
+        process_file(app_model_data)
