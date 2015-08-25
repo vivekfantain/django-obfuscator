@@ -20,14 +20,17 @@ This module will take each model and update the data
 import logging
 import string
 import random
+from datetime import date
 from django.db import transaction
 from . import discover
 
 
 logger = logging.getLogger("data_obfuscator")
 
+uniq_int = {}
 
-def process_field_action(action, length):
+
+def process_field_action(name, action, length):
     if action == "name":
         return "vivek"
     if action == "zero":
@@ -35,8 +38,19 @@ def process_field_action(action, length):
     if action == "randomstring":
         return ''.join(random.choice(string.ascii_letters)
                        for _ in range(length))
-    if action == "randomnumber":
+    if action == "randomint":
         return random.randint(0, length)
+    if action == "randomemail":
+        return ''.join(random.choice(string.ascii_letters)
+                       for _ in range(15)) + '@junk.com'
+    if action == "datetoday":
+        return date.today()
+    if action == "uniqueint":
+        if name in uniq_int:
+            uniq_int[name] = uniq_int[name] + 1
+        else:
+            uniq_int[name] = random.randint(9999, 99999999)
+        return uniq_int[name]
 
 
 def process_field(model_rec, field_action):
@@ -54,6 +68,7 @@ def process_field(model_rec, field_action):
                 if field_data[1] == u"django.db.models.CharField":
                     if 'max_length' in field_data[3]:
                         updatevalue = process_field_action(
+                            field_action[0],
                             field_action[1],
                             field_data[3]['max_length'])
                         setattr(model_rec, field_action[0], updatevalue)
@@ -63,12 +78,20 @@ def process_field(model_rec, field_action):
                             "Text field {0} has no length attribute".format(
                                 field_action[0]))
                         return False
-                else:  # This is not a character field
+                elif field_data[1] == u"django.db.models.IntegerField":
                     setattr(model_rec,
                             field_action[0],
-                            process_field_action(
-                                field_action[1], 0))
+                            process_field_action(field_action[0],
+                                                 field_action[1], 99999))
                     return True
+                else:
+                    setattr(model_rec,
+                            field_action[0],
+                            process_field_action(field_action[0],
+                                                 field_action[1], 0))
+                    return True
+    # catch all
+    return False
 
 
 def process_model(model_obj, fields_collection):
@@ -76,7 +99,7 @@ def process_model(model_obj, fields_collection):
     processed = 0
     for anobj in model_obj.objects.all():
         transaction.set_autocommit(False)
-        if (processed == 0) | ((processed % 1000)!=0):
+        if (processed == 0) | ((processed % 1000) != 0):
             record_success = True
             for field_action in fields_collection:
                 record_success &= process_field(anobj, field_action)
