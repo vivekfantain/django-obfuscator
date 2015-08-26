@@ -1,8 +1,9 @@
-from os import path
 import csv
-import django
+from os import path
+from django import get_version
 from django.core.management.base import BaseCommand, CommandError
 from data_obfuscator.modelupdate import process_file
+
 
 class Command(BaseCommand):
     help = "Obfuscate the model data's"
@@ -12,13 +13,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        if django.get_version() > '1.7':
+        if get_version() > '1.7':
             csv_name = options['csv_name'][0]
         else:
             if args:
                 csv_name = args[0]
             else:
-                raise CommandError("Please enter CSV file name as a parameter.")
+                raise CommandError(
+                    "Please enter CSV file name as a parameter.")
 
         if path.exists(csv_name):
             app_model_data = self.read_csv(csv_name)
@@ -58,5 +60,6 @@ class Command(BaseCommand):
         except IOError:
             self.stdout.write("Couldn't read CSV File.")
 
-    def process_csv_data(self, app_model_data):
+    @staticmethod
+    def process_csv_data(app_model_data):
         process_file(app_model_data)
