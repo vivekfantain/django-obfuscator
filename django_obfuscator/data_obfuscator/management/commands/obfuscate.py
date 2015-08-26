@@ -1,31 +1,39 @@
 from os import path
-from csv import DictReader
+import csv
+import django
 from django.core.management.base import BaseCommand, CommandError
 from data_obfuscator.modelupdate import process_file
 
 class Command(BaseCommand):
     help = "Obfuscate the model data's"
 
-    def handle(self, *args, **options):
-        if args:
-            csv_name = args[0]
+    def add_arguments(self, parser):
+        parser.add_argument('csv_name', nargs='+', type=str)
 
-            if path.exists(csv_name):
-                app_model_data = self.read_csv(csv_name)
-                self.process_csv_data(app_model_data)
-            else:
-                raise CommandError("CSV file not found.")
+    def handle(self, *args, **options):
+
+        if django.get_version() > '1.7':
+            csv_name = options['csv_name'][0]
         else:
-            raise CommandError("Please enter CSV file name as a parameter.")
+            if args:
+                csv_name = args[0]
+            else:
+                raise CommandError("Please enter CSV file name as a parameter.")
+
+        if path.exists(csv_name):
+            app_model_data = self.read_csv(csv_name)
+            self.process_csv_data(app_model_data)
+        else:
+            raise CommandError("CSV file not found.")
 
     @staticmethod
     def get_csv_record(csv_name):
         with open(csv_name) as csv_file:
-            reader = DictReader(csv_file)
+            reader = csv.reader(csv_file)
 
             for row in reader:
-                key = row['app_name'].strip(), row['model_name'].strip(),
-                value = row['field_name'].strip(), row['operation'].strip(),
+                key = row[0].strip(), row[1].strip(),
+                value = row[2].strip(), row[3].strip(),
 
                 yield key, value
 
