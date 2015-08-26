@@ -1,5 +1,5 @@
-import csv
 from os import path
+import csv
 from django import get_version
 from django.core.management.base import BaseCommand, CommandError
 from data_obfuscator.modelupdate import process_file
@@ -34,10 +34,10 @@ class Command(BaseCommand):
             reader = csv.reader(csv_file)
 
             for row in reader:
-                key = row[0].strip(), row[1].strip(),
-                value = row[2].strip(), row[3].strip(),
+                app_model = (row[0].strip(), row[1].strip())
+                field_operation = (row[2].strip(), row[3].strip())
 
-                yield key, value
+                yield app_model, field_operation
 
     def read_csv(self, csv_name):
         try:
@@ -46,12 +46,12 @@ class Command(BaseCommand):
             app_model_data = {}
             while True:
                 try:
-                    key, value = csv_rec.next()
-                    if key in app_model_data:
-                        if value not in app_model_data[key]:
-                            app_model_data[key].append(value)
+                    app_model, field_operation = csv_rec.next()
+                    if app_model in app_model_data:
+                        if field_operation not in app_model_data[app_model]:
+                            app_model_data[app_model].append(field_operation)
                     else:
-                        app_model_data[key] = [value]
+                        app_model_data[app_model] = [field_operation]
 
                 except StopIteration:
                     break
