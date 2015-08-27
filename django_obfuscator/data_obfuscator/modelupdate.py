@@ -32,7 +32,7 @@ uniq_int = {}
 
 def process_field_action(name, action, length):
     if action == "name":
-        return get_random_name()
+        return get_random_name(length)
     if action == "zero":
         return 0
     if action == "randomstring":
@@ -139,6 +139,12 @@ def process_file(filedata):
                     modelinfo[0],
                     modelinfo[1]))
 
-def get_random_name():
-    name_set = set(line.strip() for line in open('person_names.txt'))
-    return random.sample(name_set, 1)[0]
+
+def get_random_name(field_length):
+    name_set = set(
+        line.strip() for line in open('person_names.txt') if len(line.strip()))
+
+    name = random.sample(name_set, 1)[0]
+    if not len(name) <= field_length:
+        name = name[:field_length]
+    return name
