@@ -32,7 +32,7 @@ uniq_int = {}
 
 def process_field_action(name, action, length):
     if action == "name":
-        return "vivek"
+        return get_random_name()
     if action == "zero":
         return 0
     if action == "randomstring":
@@ -47,7 +47,7 @@ def process_field_action(name, action, length):
         return date.today()
     if action == "uniqueint":
         if name in uniq_int:
-            uniq_int[name] = uniq_int[name] + 1
+            uniq_int[name] += 1
         else:
             uniq_int[name] = random.randint(9999, 99999999)
         return uniq_int[name]
@@ -133,3 +133,12 @@ def process_file(filedata):
         model = discover.get_model(modelinfo[0], modelinfo[1])
         if model:
             process_model(model, fieldinfo)
+        else:
+            logger.error(
+                u"Unknown App {0} or model  {1}".format(
+                    modelinfo[0],
+                    modelinfo[1]))
+
+def get_random_name():
+    name_set = set(line.strip() for line in open('person_names.txt'))
+    return random.sample(name_set, 1)[0]

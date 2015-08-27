@@ -1,33 +1,43 @@
 from os import path
-from csv import DictReader
+import csv
+from django import get_version
 from django.core.management.base import BaseCommand, CommandError
 from data_obfuscator.modelupdate import process_file
+
 
 class Command(BaseCommand):
     help = "Obfuscate the model data's"
 
-    def handle(self, *args, **options):
-        if args:
-            csv_name = args[0]
+    def add_arguments(self, parser):
+        parser.add_argument('csv_name', nargs='+', type=str)
 
-            if path.exists(csv_name):
-                app_model_data = self.read_csv(csv_name)
-                self.process_csv_data(app_model_data)
-            else:
-                raise CommandError("CSV file not found.")
+    def handle(self, *args, **options):
+
+        if get_version() > '1.7':
+            csv_name = options['csv_name'][0]
         else:
-            raise CommandError("Please enter CSV file name as a parameter.")
+            if args:
+                csv_name = args[0]
+            else:
+                raise CommandError(
+                    "Please enter CSV file name as a parameter.")
+
+        if path.exists(csv_name):
+            app_model_data = self.read_csv(csv_name)
+            self.process_csv_data(app_model_data)
+        else:
+            raise CommandError("CSV file not found.")
 
     @staticmethod
     def get_csv_record(csv_name):
         with open(csv_name) as csv_file:
-            reader = DictReader(csv_file)
+            reader = csv.reader(csv_file)
 
             for row in reader:
-                key = row['app_name'].strip(), row['model_name'].strip(),
-                value = row['field_name'].strip(), row['operation'].strip(),
+                app_model = (row[0].strip(), row[1].strip())
+                field_operation = (row[2].strip(), row[3].strip())
 
-                yield key, value
+                yield app_model, field_operation
 
     def read_csv(self, csv_name):
         try:
@@ -36,12 +46,12 @@ class Command(BaseCommand):
             app_model_data = {}
             while True:
                 try:
-                    key, value = csv_rec.next()
-                    if key in app_model_data:
-                        if value not in app_model_data[key]:
-                            app_model_data[key].append(value)
+                    app_model, field_operation = csv_rec.next()
+                    if app_model in app_model_data:
+                        if field_operation not in app_model_data[app_model]:
+                            app_model_data[app_model].append(field_operation)
                     else:
-                        app_model_data[key] = [value]
+                        app_model_data[app_model] = [field_operation]
 
                 except StopIteration:
                     break
@@ -50,5 +60,6 @@ class Command(BaseCommand):
         except IOError:
             self.stdout.write("Couldn't read CSV File.")
 
-    def process_csv_data(self, app_model_data):
+    @staticmethod
+    def process_csv_data(app_model_data):
         process_file(app_model_data)
