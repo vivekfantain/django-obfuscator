@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        if get_version() > '1.7':
+        if float(get_version()[:3]) > 1.7:
             csv_name = options['csv_name'][0]
         else:
             if args:
