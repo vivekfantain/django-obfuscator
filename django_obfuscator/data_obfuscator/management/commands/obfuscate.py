@@ -34,10 +34,10 @@ class Command(BaseCommand):
             reader = csv.reader(csv_file)
 
             for row in reader:
-                app_model = (row[0].strip(), row[1].strip())
-                field_operation = (row[2].strip(), row[3].strip())
-
-                yield app_model, field_operation
+                if row:
+                    app_model = (row[0].strip(), row[1].strip())
+                    field_operation = (row[2].strip(), row[3].strip())
+                    yield app_model, field_operation
 
     def read_csv(self, csv_name):
         try:
