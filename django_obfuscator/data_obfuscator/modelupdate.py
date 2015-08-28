@@ -31,6 +31,7 @@ from . import discover
 logger = logging.getLogger("data_obfuscator")
 
 uniq_int = {}
+name_counter = 0
 
 
 def process_field_action(name, action, length):
@@ -144,11 +145,19 @@ def process_file(filedata):
 
 
 def get_random_name(field_length):
+    global name_counter
+
     name_file_path = path.join(MEDIA_ROOT, 'person_names.txt')
     name_set = set(
         line.strip() for line in open(name_file_path) if len(line.strip()))
 
-    name = random.sample(name_set, 1)[0]
-    if not len(name) <= field_length:
-        name = name[:field_length]
-    return name
+    if name_set:
+        name = random.sample(name_set, 1)[0]
+        name = "{0}{1}".format(name_counter, name)
+
+        if not len(name) <= field_length:
+            name = name[:field_length]
+
+        name_counter += 1
+        return name
+    return "NoNameFound"
