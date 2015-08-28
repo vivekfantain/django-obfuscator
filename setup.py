@@ -12,7 +12,7 @@ setup(
     author='Vivek Venugopalan',
     author_email='vivek@fantain.com',
     url='https://github.com/vivekfantain/django-obfuscator',
-    download_url='https://github.com/peterldowns/mypackage/tarball/0.1',
+    download_url='https://github.com/vivekfantain/django-obfuscator/tarball/0.1',
     keywords=['obfuscate', 'django-obfuscate'],
     classifiers=[],
 )
