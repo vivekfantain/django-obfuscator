@@ -1,7 +1,9 @@
 from distutils.core import setup
 
 
-desc = "Obfuscate the sensitive information from database table"
+desc = """ Obfuscate sensitive information in production django databases so
+that it can be distributed to various developers."""
+
 setup(
     name='django-obfuscator',
     packages=['django-obfuscator'],
