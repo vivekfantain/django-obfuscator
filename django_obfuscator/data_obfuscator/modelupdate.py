@@ -158,6 +158,8 @@ def get_random_name(field_length):
         if not len(name) <= field_length:
             name = name[:field_length]
 
-        name_counter += 1
-        return name
-    return "NoNameFound"
+    else:
+        name = "{0}NoNameFound".format(name_counter)
+
+    name_counter += 1
+    return name
