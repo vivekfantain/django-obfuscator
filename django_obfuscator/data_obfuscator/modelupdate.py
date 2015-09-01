@@ -14,7 +14,6 @@ Copyright  2015, Fantain Sports Private Limited
    limitations under the License.
 """
 
-
 """
 This module will take each model and update the data
 """
@@ -24,14 +23,13 @@ import string
 import random
 from datetime import date
 from django.db import transaction
-from django.conf import settings
 from . import discover
-
 
 logger = logging.getLogger("data_obfuscator")
 
 uniq_int = {}
 name_counter = 0
+crr_path = path.split(__file__)[0]
 
 
 def process_field_action(name, action, length):
@@ -146,8 +144,8 @@ def process_file(filedata):
 
 def get_random_name(field_length):
     global name_counter
-    
-    name_file_path = path.join(settings.MEDIA_ROOT, 'person_names.txt')
+
+    name_file_path = path.join(crr_path, 'static/media/person_names.txt')
     name_set = set(
         line.strip() for line in open(name_file_path) if len(line.strip()))
 
