@@ -1,0 +1,4 @@
+include LICENSE
+include README.txt
+recursive-include django_obfuscator/data_obfuscator/*
+
