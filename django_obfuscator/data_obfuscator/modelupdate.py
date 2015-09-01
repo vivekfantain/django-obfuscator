@@ -146,7 +146,7 @@ def process_file(filedata):
 
 def get_random_name(field_length):
     global name_counter
-    print settings.MEDIA_ROOT
+    
     name_file_path = path.join(settings.MEDIA_ROOT, 'person_names.txt')
     name_set = set(
         line.strip() for line in open(name_file_path) if len(line.strip()))
