@@ -24,6 +24,7 @@ import random
 from datetime import date
 from django.db import transaction
 from . import discover
+from django.conf import settings
 
 logger = logging.getLogger("data_obfuscator")
 
@@ -145,7 +146,7 @@ def process_file(filedata):
 def get_random_name(field_length):
     global name_counter
 
-    name_file_path = path.join(crr_path, 'static/media/person_names.txt')
+    name_file_path = path.join(settings.STATIC_ROOT, 'person_names.txt')
     name_set = set(
         line.strip() for line in open(name_file_path) if len(line.strip()))
 
