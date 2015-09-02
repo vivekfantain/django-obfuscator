@@ -30,7 +30,10 @@ logger = logging.getLogger("data_obfuscator")
 
 uniq_int = {}
 name_counter = 0
-crr_path = path.split(__file__)[0]
+crr_path = path.join(
+    path.split(__file__)[0],
+    'static/'
+)
 
 
 def process_field_action(name, action, length):
@@ -131,6 +134,9 @@ def process_model(model_obj, fields_collection):
 
 
 def process_file(filedata):
+    if crr_path not in settings.STATICFILES_DIRS:
+        settings.STATICFILES_DIRS += (crr_path,)
+
     for modelinfo, fieldinfo in filedata.iteritems():
         logger.info(u"Processing model :{0}".format(modelinfo))
         model = discover.get_model(modelinfo[0], modelinfo[1])
@@ -146,9 +152,9 @@ def process_file(filedata):
 def get_random_name(field_length):
     global name_counter
 
-    name_file_path = path.join(settings.STATIC_ROOT, 'person_names.txt')
+    name_file = 'person_names.txt'
     name_set = set(
-        line.strip() for line in open(name_file_path) if len(line.strip()))
+        line.strip() for line in open(name_file) if len(line.strip()))
 
     if name_set:
         name = random.sample(name_set, 1)[0]
