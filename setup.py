@@ -21,8 +21,8 @@ that it can be distributed to various developers."""
 
 setup(
     name='django_obfuscator',
-    packages=['django_obfuscator'],
-    version='0.5',
+    packages=['data_obfuscator'],
+    version='0.8',
 
     include_package_data=True,
 
@@ -42,3 +42,4 @@ setup(
     ],
 
 )
+
